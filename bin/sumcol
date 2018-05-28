@@ -1,0 +1,19 @@
+#!/bin/sh
+
+verbose=0
+
+case "$1" in
+	-v)
+		verbose=1
+		shift
+		;;
+esac
+
+if [ $# -lt 1 ]; then
+	col=1
+else
+	col=$1
+fi
+
+awk -v col=$col -v verbose="$verbose" '{t+=$col; if (verbose) print;}END{print t}'
+
