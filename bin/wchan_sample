@@ -1,0 +1,80 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <sampling_period> <pid> [thread_id ...]"
+	echo
+	echo "<sampling_period> is a float value, in secs."
+	echo "Smallest viable value is probably somewhere around 0.01."
+	echo
+	echo "If no thread_ids are specified, check them all (slow when many threads)."
+	echo "Use a command like 'pidstat -u -t -p <pid> 1 10' to figure out which"
+	echo "threads are consuming the most system cpu%."
+	echo
+	echo "Needs to run as root or the same user as the target pid(s)."
+	echo "Outputs every 10 secs (resetting counters, to avoid overflow)."
+	echo
+	echo "The '0' function means userspace (or no permission to read wchan)."
+	echo "The '_#' function is the number of samples completed."
+	echo
+	exit 1
+fi
+
+SLEEP_OUTPUT="${SLEEP_OUTPUT:-10}"
+
+sleepsecs="$1"
+shift
+pid="$1"
+shift
+
+declare -iA count
+declare -i prevoutput="$SECONDS"
+
+function printvals {
+	local i
+	for i in "${!count[@]}"; do
+		echo "$i ${count[$i]}"
+	done
+	echo
+	count=()
+	prevoutput="$SECONDS"
+}
+
+trap printvals EXIT
+
+if ! cd /proc/"$pid"/task; then
+	echo "Error: can't access /proc/$pid/task"
+	exit 1
+fi
+
+echo "# $0 $sleepsecs $pid $@"
+echo "# $SLEEP_OUTPUT"
+echo "# $(date)"
+echo "# $(hostname)"
+echo
+
+shopt -s nullglob
+
+while :; do
+	tids=()
+	if [ $# -eq 0 ]; then
+		tids=(*)
+	else
+		tids=("$@")
+	fi
+	for i in "${tids[@]}"; do
+		# ignore failures from threads disappearing
+		if { v="$(<$i/wchan)"; } 2>/dev/null; then
+			if [ -n "$v" ]; then
+				let "count[$v]++"
+			fi
+		fi
+	done
+	let "count[_#]++"
+
+	if (( SECONDS > prevoutput + SLEEP_OUTPUT )); then
+		printvals
+	fi
+
+	sleep "$sleepsecs"
+done
+
