@@ -1,0 +1,4 @@
+#!/bin/bash
+cmd="${0%l}"
+cmd="${cmd##*/}"
+"$cmd" --color=always "$@" | less -R
