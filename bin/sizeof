@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+	set "short" "unsigned short" "int" "unsigned int" "long" "unsigned long" "long long" "unsigned long long" "char" "unsigned char" "void*" "size_t" "ssize_t"
+fi
+
+tmpfile="$(mktemp -t sizeof-XXXXXX)"
+
+trap "rm -f \"$tmpfile\"" 0 ERR
+
+(
+	cat <<-EOF
+	#include <stdio.h>
+	#include <unistd.h>
+
+	int main(int argc, char *argv[]) {
+	EOF
+	for i; do
+		echo "printf(\"sizeof($i) = %lu\\n\", sizeof($i));"
+	done
+	cat <<-EOF
+	}
+	EOF
+) | ${CC:-cc} -o "$tmpfile" -x c - && "$tmpfile"
+
+
+
