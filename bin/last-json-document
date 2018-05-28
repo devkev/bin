@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Extract the final JSON document from one or more text files.
+#
+# Output is always to stdout.
+# If no files specified, read from stdin.
+#
+# Should work with line-per-json-document and multiline formats.
+#
+# Assumptions:
+# * The leading `{` for the document is the first character on the line.
+# * No line midway through the document starts with `{`.
+# * There's no trailing junk after the final `}`.
+
+function doit {
+	tac "$@" | awk '{ print; if($0 ~ "^{") exit; }' | tac
+}
+
+if [ $# -eq 0 ]; then
+	doit
+else
+	for i; do
+		doit "$i"
+	done
+fi
