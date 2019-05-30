@@ -1,4 +1,13 @@
 #!/bin/bash
 cmd="${0%l}"
 cmd="${cmd##*/}"
-"$cmd" --color=always "$@" | less -R
+args=()
+case "$cmd" in
+	rg)
+		args+=(--pretty)
+		;;
+	*)
+		args+=(--color=always)
+		;;
+esac
+"$cmd" "${args[@]}" "$@" | less -R
