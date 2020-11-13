@@ -1,8 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
 # https://stackoverflow.com/questions/1729824/an-efficient-way-to-transpose-a-file-in-bash
 
-awk '
+args=()
+if [ "$1" = "-F" ]; then
+	args+=(-F "$2")
+	shift 2
+fi
+
+awk "${args[@]}" '
 { 
     for (i=1; i<=NF; i++)  {
         a[NR,i] = $i
@@ -13,7 +19,7 @@ END {
     for(j=1; j<=p; j++) {
         str=a[1,j]
         for(i=2; i<=NR; i++){
-            str=str" "a[i,j];
+            str=str FS a[i,j];
         }
         print str
     }
