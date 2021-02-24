@@ -1,2 +1,15 @@
 #!/bin/bash
-echo -ne '\a'
+if [ $# -ge 1 ]; then
+	limit="$1"
+	if [ "$limit" -gt 10 ]; then
+		limit=10
+	fi
+	for (( i = $limit; i > 0; i-- )); do
+		echo -ne '\a'
+		if [ $i -ne 0 ]; then
+			sleep 0.1
+		fi
+	done
+else
+	echo -ne '\a'
+fi
