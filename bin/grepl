@@ -2,6 +2,9 @@
 cmd="${0%l}"
 cmd="${cmd##*/}"
 args=()
+if [ "$cmd" = 'rg' ]; then
+	args+=(-L)
+fi
 case "$cmd" in
 	rg)
 		args+=(--pretty)
