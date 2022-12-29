@@ -1,0 +1,14 @@
+#!/bin/bash
+
+fname="$1"; shift
+args=("$@")
+
+trap 'kill $COPROC_PID' EXIT
+coproc inotifywait -e close_write,moved_to,create -m "$(dirname "$fname")"
+while read -r directory events filename; do
+	if [ "$filename" = "$fname" ]; then
+		echo run: "${args[*]}"
+		"${args[@]}"
+	fi
+done <&${COPROC[0]}
+
