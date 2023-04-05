@@ -7,6 +7,7 @@ trap 'kill $COPROC_PID' EXIT
 coproc inotifywait -e close_write,moved_to,create -m "$(dirname "$fname")"
 while read -r directory events filename; do
 	if [ "$filename" = "$fname" ]; then
+		#echo "$directory $events $filename"
 		echo run: "${args[*]}"
 		"${args[@]}"
 	fi
