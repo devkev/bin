@@ -1,8 +1,27 @@
 
 # Usage:
 #   filter-stderr cmd_to_run arg1 arg2 ... --- stderr_filter_cmd arg1 arg2 ...
+#
 # If '---' somehow conflicts with an actual arg you need to pass to cmd_to_run or stderr_filter,
 # then set $FILTER_STDERR_DELIM to the delimiter that you'd like to use.
+#
+# Simple test cases:
+#   $ filter-stderr stdouterr-test --- sed 's/e/E/g' ; echo -ne '\n---\n\n' ; filter-stderr stdouterr-test --- sed 's/e/E/g' 2>/dev/null ; echo -ne '\n---\n\n' ; filter-stderr stdouterr-test --- sed 's/e/E/g' 1>/dev/null
+#   $ ( FILTER_STDERR_DELIM='===' ; filter-stderr stdouterr-test === sed 's/e/E/g' ; echo -ne '\n---\n\n' ; filter-stderr stdouterr-test === sed 's/e/E/g' 2>/dev/null ; echo -ne '\n---\n\n' ; filter-stderr stdouterr-test === sed 's/e/E/g' 1>/dev/null ; )
+#
+# Expected output in both cases:
+#
+#   this is stdout
+#   this is stdErr
+#   
+#   ---
+#   
+#   this is stdout
+#   
+#   ---
+#   
+#   this is stdErr
+
 
 function filter-stderr {
 	local delim="${FILTER_STDERR_DELIM:----}"
