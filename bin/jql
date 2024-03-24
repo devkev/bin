@@ -1,0 +1,6 @@
+#!/bin/bash
+cmd="${0%l}"
+cmd="${cmd##*/}"
+args=()
+args+=(--color-output)
+"$cmd" "${args[@]}" "$@" | less -R
